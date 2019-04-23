@@ -1,0 +1,9 @@
+# Pour le docker :
+
+https://github.com/benco1967/mongo-container
+
+docker run -d --name mongo_micro_run -e MONGODB_USERNAME=TP6_JXT_USER -e MONGODB_PASSWORD=TP6_JXT_PWD -p 27017:27017 -p 28017:28017 mongo_micro --httpinterface
+
+# Liens utiles
+
+https://github.com/benco1967/horses-ref
