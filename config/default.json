@@ -1,7 +1,7 @@
 {
 	"db": {
-		"user": "user",
-		"pwd": "pass",
+		"user": "TP6_JXT_USER",
+		"pwd": "TP6_JXT_PWD",
 		"host": "localhost",
 		"port": 27017,
 		"dbName": "alerts"

@@ -4,6 +4,6 @@
 		"pwd": "TP6_JXT_PWD",
 		"host": "localhost",
 		"port": 27017,
-		"dbName": "TP6_JXT_DB"
+		"dbName": "alerts"
 	}
 }
