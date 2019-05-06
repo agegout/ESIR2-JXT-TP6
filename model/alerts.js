@@ -1,110 +1,104 @@
-const tcomb = require('tcomb')
-const checkDB = require('./dbConnection').checkDB;
-const uuid = require('uuid/v4');
+'use strict';
 
-const CATEGORY = t.enums({
-    Weather,
-    sea,
-    transport
-  }, 'Category')
+const createError = require('http-errors');
+const mongoose = require('mongoose');
+const checkDB = require('./db-connec').checkDB;
+const Alert = require('../common/models/AlertModel');
 
-const STATUS = t.enums({
-    warning,
-    threat,
-    danger,
-    risk
-  }, 'Status')
+// Definitions du modele
+const alertSchema = new mongoose.Schema({
+    id: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+      index: true,
+    },
+    type: {
+        type: String,
+        enum : ["weather", "sea", "transport"],
+        required: true
+    },
+    label: {
+        type: String,
+        required: true
+    },
+    status: {
+        type: String,
+        enum : ["warning", "threat", "danger", "risk" ],
+        required: true
+    },
+    from: {
+        type: Date,
+        required: true
+    },
+    to: {
+        type: Date,
+        required: true
+    }
+  });
 
-const ALERT = tcomb.struct({
-    id: tcomb.String,
-    type: CATEGORY,
-    label: tcomb.String,
-    status: STATUS,
-    from: tcomb.DATE,
-    to: tcomb.DATE
+// Models are created from schemas using the mongoose.model() method:
+const AlertModel = mongoose.model('alert', AlertSchema , 'alerts');
 
-}, {strict: true})
+const get = async (idAlert) => {
+  await checkDB();
+  const alert = await AlertModel.findOne({id: idAlert});
+  if (alert === null) throw new createError.NotFound("No such alert");
+  return alert;
+};
 
-const ERROR = tcomb.struct({
-    code: tcomb.number,
-    type: tcomb.String,
-    message: tcomb.String
-}, {strict: true})
+const search = async (statusAlert) => {
+    await checkDB();
+    const alerts = await AlertModel.find({status: statusAlert});
+    return alerts;
+};
 
-const get = (id) => {
-  const usersFound = users.filter((user) => user.id === id)
-  return usersFound.length >= 1
-      ? usersFound[0]
-      : undefined
-}
+const update = async (idAlert, proj, value) => {
+    await checkDB();
+    const update = {$set: {}};
+    update.$set[proj] = value;
+    const talert = await AlertModel.findOneAndUpdate({id: idAlert}, update, {new: true});
+    if (alert === null) throw new createError.NotFound("No such alert");
+    return tenant[proj];
+};
 
-const getAll = () => {
-  return users
-}
+const remove = async (idAlert) => {
+    await checkDB();
+    const alert = await AlertModel.findByIdAndDelete({id: idAlert});
+    if (alert === null) throw new createError.NotFound("No such alert");
+    return alert;
+};
 
-const add = (user) => {
-  const newUser = {
-      ...user,
-      id: uuidv1()
+
+/**
+ * Create an empty tenant with the given id and description.
+ * If the tenant already exists throws an exception with the appropriate code and message
+ * @param alertId id for the new tenant
+ * @param type 
+ * @param label
+ * @param status
+ * @param from
+ * @param to
+ * @returns {Promise} a promise resolved to the new tenant if creation succeeded
+ */
+const create = async (alertId, type, label, status, from, to) => {
+  await checkDB();
+  const alert = await AlertModel.findOne({id: alertId}, {id: 1});
+  if (alert !== null) {
+    error(`try to create the alert "${alertId}" that already exists`);
+    throw new createError.Conflict("Already defined");
   }
-  if (validateUser(newUser)) {
-      users.push(newUser)
-  } else {
-      throw new Error('user.not.valid')
-  }
-  return newUser
-}
+  debug(`create the alert "${alertId}"`);
+  return AlertModel.create(new Alert(alertId, type, label, status, from, to));
+};
 
-const update = (id, newUserProperties) => {
-  const usersFound = users.filter((user) => user.id === id)
-
-  if (usersFound.length === 1) {
-      const oldUser = usersFound[0]
-
-      const newUser = {
-          ...oldUser,
-          ...newUserProperties
-      }
-
-      // Control data to patch
-      if (validateUser(newUser)) {
-          // Object.assign permet d'éviter la suppression de l'ancien élément puis l'ajout
-          // du nouveau Il assigne à l'ancien objet toutes les propriétés du nouveau
-          Object.assign(oldUser, newUser)
-          return oldUser
-      } else {
-          throw new Error('user.not.valid')
-      }
-  } else {
-      throw new Error('user.not.found')
-  }
-}
-
-const remove = (id) => {
-  const indexFound = users.findIndex((user) => user.id === id)
-  if (indexFound > -1) {
-      users.splice(indexFound, 1)
-  } else {
-      throw new Error('user.not.found')
-  }
-}
-
-function validateUser(user) {
-  let result = false
-  /* istanbul ignore else */
-  if (user) {
-      try {
-          const tcombUser = USER(user)
-          result = true
-      } catch (exc) {
-          result = false
-      }
-  }
-  return result
-}
-
-exports.get = get
-exports.getAll = getAll
-exports.add = add
-exports.update = update
-exports.remove = remove
+// make this available to our tenant in our Node applications
+module.exports = {
+  model: AlertModel,
+  get,
+  search,
+  create,
+  update,
+  remove
+};
