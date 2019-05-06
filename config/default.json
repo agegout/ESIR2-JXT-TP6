@@ -1,0 +1,9 @@
+{
+	"db": {
+		"user": "user",
+		"pwd": "pass",
+		"host": "localhost",
+		"port": 27017,
+		"dbName": "alerts"
+	}
+}

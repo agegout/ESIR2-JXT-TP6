@@ -1,5 +1,5 @@
 const config = require('config');
-const tenants = require('../models/AlertModel');
+const alerts = require('../model/alerts');
 
 /**
  * Gestion des tenants par le super administrateur
@@ -17,17 +17,31 @@ module.exports = {
    * @param next
    */
   getByIdAlert: (req, res, next) => {
-    // TODO la pagination
-    tenants.getAll()
-      .then(tenants => {
-        res.status(200).json(alertss);
+    const AlertId = req.params.AlertId;
+    alerts.get(AlertId)
+      .then(alerts => {
+        res.status(200).json(alerts);
       })
       .catch(err => {
-        errorLog(`Unable to get all tenants: ${err.message}`);
+        errorLog(`Unable to get this alert: ${err.message}`);
         next(err);
       });
   },
 
+  getByStatus: (req, res, next) => {
+
+    const AlertStatus = req.query.status
+    
+    alerts.search(AlertStatus)
+      .then(alerts => {
+        res.status(200).json(alerts);
+      })
+      .catch(err => {
+        errorLog(`Unable to get all alerts with this status: ${err.message}`);
+        next(err);
+      });
+
+  },
 
 
   /**
@@ -54,7 +68,7 @@ module.exports = {
     };
 
     const newAlert = req.body;
-    tenants.create(newAlert.id, newAlert.texts.type, newAlert.texts.label, newAlert.texts.status, newAlert.texts.from, newAlert.texts.to)
+    alerts.create(newAlert.id, newAlert.texts.type, newAlert.texts.label, newAlert.texts.status, newAlert.texts.from, newAlert.texts.to)
       .then(Alert => {
         addAlertUri(res, alert.id);
         res.status(201).end();
@@ -73,14 +87,26 @@ module.exports = {
    * @param next
    */
   updateAlert: (req, res, next) => {
-    const AlertId = req.getPrm('alert', 'value', 'id');
+    const AlertId = req.params.AlertId;
     const new_alert = req.body;
-    tenants.update(alertId, 'alert', new_alert)
+    tenants.update(AlertId, 'alert', new_alert)
       .then(() => {
         res.status(200).end();
       })
       .catch(err => {
         errorLog(`Unable to update the alert: ${err.message}`);
+        next(err);
+      });
+  },
+
+  deleteAlert: (req, res, next) => {
+    const AlertId = req.params.AlertId;
+    tenants.remove(AlertId)
+      .then(() => {
+        res.status(200).end();
+      })
+      .catch(err => {
+        errorLog(`Unable to delete the alert: ${err.message}`);
         next(err);
       });
   },

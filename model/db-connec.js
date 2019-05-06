@@ -6,8 +6,8 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
 //configuration de connexion la la bdd
-
-const dbConfig = require('config').get('db');
+const config = require('config');
+const dbConfig = config.get('db');
 
 // Build the connection string
 const uri = `mongodb://${dbConfig.user}:${dbConfig.pwd}@${dbConfig.host}:${dbConfig.port}/${dbConfig.dbName}`;
@@ -40,7 +40,6 @@ const checkDB = async () => {
 
 module.exports = {
     uri,
-    options,
     checkDB,
-    openDB,
+    openDB
 };

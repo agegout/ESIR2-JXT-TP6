@@ -6,7 +6,7 @@ const checkDB = require('./db-connec').checkDB;
 const Alert = require('../common/models/AlertModel');
 
 // Definitions du modele
-const alertSchema = new mongoose.Schema({
+const AlertSchema = new mongoose.Schema({
     id: {
       type: String,
       required: true,
@@ -50,7 +50,7 @@ const get = async (idAlert) => {
 
 const search = async (statusAlert) => {
     await checkDB();
-    const alerts = await AlertModel.find({status: statusAlert});
+    const alerts = await AlertModel.find({status: { $in: statusAlert }});
     return alerts;
 };
 
