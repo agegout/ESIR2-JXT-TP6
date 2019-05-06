@@ -4,10 +4,10 @@ const tenants = require('../models/AlertModel');
 /**
  * Gestion des tenants par le super administrateur
  * Permet de :
- * <li>lister les tenants
- * <li>créer un tenant
- * <li>récupérer les paramètres administrateur du tenant
- * <li>modifier les paramètres administrateur du tenant
+ * <li>chercher des alerts par ID ou Status
+ * <li>créer une alert
+ * <li>détruire une alert
+ * <li>modifier une alert
  */
 module.exports = {
   /**
@@ -20,7 +20,7 @@ module.exports = {
     // TODO la pagination
     tenants.getAll()
       .then(tenants => {
-        res.status(200).json(tenants);
+        res.status(200).json(alertss);
       })
       .catch(err => {
         errorLog(`Unable to get all tenants: ${err.message}`);

@@ -7,24 +7,10 @@ mongoose.Promise = global.Promise;
 
 //configuration de connexion la la bdd
 
-const db_user = 'TP6_JXT_USER'
-const db_pwd = 'TP6_JXT_PWD'
-const db_port = 27017
-const db_host = 'localhost'
-const db_name = 'TP6_JXT_DB'
-
-
-const options = {
-  //autoIndex: false, // Don't build indexes
-  //reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
-  //reconnectInterval: 500, // Reconnect every 500ms
-  //poolSize: 10, // Maintain up to 10 socket connections
-  // If not connected, return errors immediately rather than waiting for reconnect
-  //bufferMaxEntries: 0
-};
+const dbConfig = require('config').get('db');
 
 // Build the connection string
-const uri = `mongodb://${db_user}:${db_pwd}@${db_host}:${db_port}/${db_name}`;
+const uri = `mongodb://${dbConfig.user}:${dbConfig.pwd}@${dbConfig.host}:${dbConfig.port}/${dbConfig.dbName}`;
 
 const disconnectHandler = () => {
     console.log('Mongoose default connection disconnected');
