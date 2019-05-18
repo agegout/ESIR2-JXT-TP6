@@ -56,16 +56,14 @@ const search = async (statusAlert) => {
 
 const update = async (idAlert, proj, value) => {
     await checkDB();
-    const update = {$set: {}};
-    update.$set[proj] = value;
-    const talert = await AlertModel.findOneAndUpdate({id: idAlert}, update, {new: true});
+    const alert = await AlertModel.findOneAndUpdate({id: idAlert}, value, {new: true});
     if (alert === null) throw new createError.NotFound("No such alert");
-    return tenant[proj];
+    return alert;
 };
 
 const remove = async (idAlert) => {
     await checkDB();
-    const alert = await AlertModel.findByIdAndDelete({id: idAlert});
+    const alert = await AlertModel.findOneAndDelete({id: idAlert});
     if (alert === null) throw new createError.NotFound("No such alert");
     return alert;
 };
@@ -82,14 +80,11 @@ const remove = async (idAlert) => {
  * @param to
  * @returns {Promise} a promise resolved to the new tenant if creation succeeded
  */
-const create = async (alertId, type, label, status, from, to) => {
+const create = async (type, label, status, from, to) => {
   await checkDB();
-  const alert = await AlertModel.findOne({id: alertId}, {id: 1});
-  if (alert !== null) {
-    error(`try to create the alert "${alertId}" that already exists`);
-    throw new createError.Conflict("Already defined");
-  }
-  debug(`create the alert "${alertId}"`);
+  const uuidv1 = require('uuid/v1');
+  const alertId = uuidv1(); // ⇨ '3b99e3e0-7598-11e8-90be-95472fb3ecbd'
+  console.log(`create the alert "${alertId}"`);
   return AlertModel.create(new Alert(alertId, type, label, status, from, to));
 };
 

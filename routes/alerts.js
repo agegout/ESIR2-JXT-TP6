@@ -6,9 +6,9 @@ const controller = require('../controllers/alerts');
 
 router.post('/', controller.createAlert);
 
-router.get('/:AlertId', controller.getByIdAlert);
-
 router.get('/search', controller.getByStatus);
+
+router.get('/:AlertId', controller.getByIdAlert);
 
 router.delete('/:AlertId', controller.deleteAlert);
 

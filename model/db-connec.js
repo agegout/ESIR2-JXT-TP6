@@ -20,14 +20,13 @@ const openDB = async () => {
     console.log(`connecting to db ${uri}`);
     try {
         await mongoose.connect(uri);
-        debugLog("connected to the db with the default connection");
+        console.log("connected to the db with the default connection");
         await mongoose.connection
-        .removeListener('error', errorHandler)
-        .on('error', errorHandler) // If the connection throws an error
-        .removeListener('disconnected', disconnectHandler)
-        .on('disconnected', disconnectHandler);// When the connection is disconnected
     } catch (error) {
         console.error(error)
+        const errorConnect = new Error("failed to connect to the db server")
+        errorConnect.code = "ECONNECT"
+        throw errorConnect
     }
     
 };
@@ -39,7 +38,9 @@ const checkDB = async () => {
     }
     catch (err) {
         console.log(`Mongo error: ${err && err.message && JSON.stringify(err) || err}`);
-        throw new createError.ServiceUnavailable("failed to connect to the db server");
+        const errorConnect = new Error("failed to connect to the db server")
+        errorConnect.code = "ECONNECT"
+        throw errorConnect
     }
 };
 

@@ -23,7 +23,10 @@ module.exports = {
         res.status(200).json(alerts);
       })
       .catch(err => {
-        errorLog(`Unable to get this alert: ${err.message}`);
+        console.error(`Unable to get this alert: ${err.message}`);
+        if (err.code == "ECONNECT") {
+          res.status(500).send(`${err.message}`);
+        } 
         next(err);
       });
   },
@@ -37,7 +40,10 @@ module.exports = {
         res.status(200).json(alerts);
       })
       .catch(err => {
-        errorLog(`Unable to get all alerts with this status: ${err.message}`);
+        console.error(`Unable to get all alerts with this status: ${err.message}`);
+        if (err.code == "ECONNECT") {
+          res.status(500).send(`${err.message}`);
+        } 
         next(err);
       });
 
@@ -51,30 +57,19 @@ module.exports = {
    * @param next
    */
   createAlert: (req, res, next) => {
-    const url = config.get('basePath');
-    const addAlertUri = (res, idAlert) => {
-      res.header("link",
-        new links()
-          .add({
-            href: `${url}/alerts/${idAlert}`,
-            rel: "self",
-            title: "Reference to the alert uri",
-            name: "alert",
-            method: "GET",
-            type: "application/json"
-          })
-          .build()
-      );
-    };
 
     const newAlert = req.body;
-    alerts.create(newAlert.id, newAlert.texts.type, newAlert.texts.label, newAlert.texts.status, newAlert.texts.from, newAlert.texts.to)
-      .then(Alert => {
-        addAlertUri(res, alert.id);
-        res.status(201).end();
+    alerts.create(newAlert.type, newAlert.label, newAlert.status, newAlert.from, newAlert.to)
+      .then((created) => {
+        res.status(201).send(created).end();
       })
       .catch(err => {
-        errorLog(`Unable to create the new alert: ${err.message}`);
+        console.error(`Unable to create the new alert: ${err.message}`);
+        if (err.code == "ECONNECT") {
+          res.status(500).send(`${err.message}`);
+        } else if (err.code == "ECONFLICT") {
+          res.status(409).send(`${err.message}`);
+        }
         next(err);
       });
   },
@@ -89,28 +84,31 @@ module.exports = {
   updateAlert: (req, res, next) => {
     const AlertId = req.params.AlertId;
     const new_alert = req.body;
-    tenants.update(AlertId, 'alert', new_alert)
-      .then(() => {
-        res.status(200).end();
+    alerts.update(AlertId, 'alert', new_alert)
+      .then((updated) => {
+        res.status(200).send(updated).end();
       })
       .catch(err => {
-        errorLog(`Unable to update the alert: ${err.message}`);
+        console.error(`Unable to update the alert: ${err.message}`);
+        if (err.code == "ECONNECT") {
+          res.status(500).send(`${err.message}`);
+        } 
         next(err);
       });
   },
 
   deleteAlert: (req, res, next) => {
     const AlertId = req.params.AlertId;
-    tenants.remove(AlertId)
-      .then(() => {
-        res.status(200).end();
+    alerts.remove(AlertId)
+      .then((deleted) => {
+        res.status(200).send(deleted).end();
       })
       .catch(err => {
-        errorLog(`Unable to delete the alert: ${err.message}`);
+        console.error(`Unable to delete the alert: ${err.message}`);
+        if (err.code == "ECONNECT") {
+          res.status(500).send(`${err.message}`);
+        } 
         next(err);
       });
   },
 };
-
-
-//TODO
