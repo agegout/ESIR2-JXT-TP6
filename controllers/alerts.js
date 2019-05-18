@@ -67,8 +67,6 @@ module.exports = {
         console.error(`Unable to create the new alert: ${err.message}`);
         if (err.code == "ECONNECT") {
           res.status(500).send(`${err.message}`);
-        } else if (err.code == "ECONFLICT") {
-          res.status(409).send(`${err.message}`);
         }
         next(err);
       });
